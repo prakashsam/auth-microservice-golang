@@ -1,22 +1,19 @@
-substitutions:
-  _PROJECT_ID: lyrical-mason-465314-f4
-  _REGION: us-central1
-
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', '$_REGION-docker.pkg.dev/$_PROJECT_ID/go-services/auth-service:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/lyrical-mason-465314-f4/go-services/auth-service:$COMMIT_SHA', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', '$_REGION-docker.pkg.dev/$_PROJECT_ID/go-services/auth-service:$COMMIT_SHA']
+    args: ['push', 'us-central1-docker.pkg.dev/lyrical-mason-465314-f4/go-services/auth-service:$COMMIT_SHA']
 
-  - name: 'gcr.io/cloud-builders/gcloud'
+  - name: 'gcr.io/cloud-builders/kubectl'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        gcloud container clusters get-credentials my-cluster --region=$_REGION
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        gcloud container clusters get-credentials order-service-cluster --region=us-central1
         helm upgrade --install auth-service ./helm/auth-service \
-          --set image.repository=$_REGION-docker.pkg.dev/$_PROJECT_ID/go-services/auth-service \
+          --set image.repository=us-central1-docker.pkg.dev/lyrical-mason-465314-f4/go-services/auth-service \
           --set image.tag=$COMMIT_SHA \
           --set env.DB_PORT=5432 \
           --set env.DB_NAME=orderpaymentdb \
@@ -24,7 +21,7 @@ steps:
           --set env.DB_HOST=34.57.113.181
 
 images:
-  - '$_REGION-docker.pkg.dev/$_PROJECT_ID/go-services/auth-service:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/lyrical-mason-465314-f4/go-services/auth-service:$COMMIT_SHA'
 
 options:
-  logging: CLOUD_LOGGING_ONLY  
+  logging: CLOUD_LOGGING_ONLY
