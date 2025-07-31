@@ -1,0 +1,16 @@
+replicaCount: 1
+
+image:
+  repository: us-central1-docker.pkg.dev/lyrical-mason-465314-f4/go-services/auth-service
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8081
+
+env:
+  DB_PORT: 5432
+  DB_NAME: orderpaymentdb
+  DB_USER: postgres
+  DB_HOST: 34.57.113.181

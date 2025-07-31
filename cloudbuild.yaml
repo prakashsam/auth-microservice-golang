@@ -1,0 +1,27 @@
+substitutions:
+  _PROJECT_ID: lyrical-mason-465314-f4
+  _REGION: us-central1
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '$_REGION-docker.pkg.dev/$_PROJECT_ID/go-services/auth-service:$COMMIT_SHA', '.']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '$_REGION-docker.pkg.dev/$_PROJECT_ID/go-services/auth-service:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud container clusters get-credentials my-cluster --region=$_REGION
+        helm upgrade --install auth-service ./helm/auth-service \
+          --set image.repository=$_REGION-docker.pkg.dev/$_PROJECT_ID/go-services/auth-service \
+          --set image.tag=$COMMIT_SHA \
+          --set env.DB_PORT=5432 \
+          --set env.DB_NAME=orderpaymentdb \
+          --set env.DB_USER=postgres \
+          --set env.DB_HOST=34.57.113.181
+
+images:
+  - '$_REGION-docker.pkg.dev/$_PROJECT_ID/go-services/auth-service:$COMMIT_SHA'
