@@ -10,6 +10,7 @@ service:
   port: 8081
 
 env:
+  GCP_PROJECT_ID: lyrical-mason-465314-f4
   DB_PORT: 5432
   DB_NAME: orderpaymentdb
   DB_USER: postgres
