@@ -1,13 +1,14 @@
-FROM golang:1.24.5 as builder
-
+FROM golang:1.21 AS builder
 WORKDIR /app
 COPY . .
-
 ENV CGO_ENABLED=0
 RUN go build -o auth-service main.go
 
-FROM scratch
-WORKDIR /app
-COPY --from=builder /app/auth-service .
+# Minimal runtime image
+FROM gcr.io/distroless/static
 
-CMD ["/app/auth-service"]
+# 👇 Copy CA certs
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /app/auth-service /
+
+CMD ["/auth-service"]
